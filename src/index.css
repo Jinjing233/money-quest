@@ -1,0 +1,90 @@
+@import "tailwindcss";
+
+@theme {
+  --font-pixel: "Press Start 2P", monospace;
+  --font-pixel-body: "VT323", monospace;
+
+  --color-cream: #f3e3b3;
+  --color-cream-light: #faf1d8;
+  --color-sage: #8fa878;
+  --color-sage-dark: #5f7a4e;
+  --color-brown: #6b4f3b;
+  --color-brown-dark: #4a3626;
+  --color-brown-light: #a9835f;
+  --color-stress: #d97757;
+  --color-energy: #6fa8dc;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background-color: var(--color-cream);
+  color: var(--color-brown);
+  font-family: var(--font-pixel-body);
+  image-rendering: pixelated;
+  -webkit-font-smoothing: none;
+}
+
+.font-pixel {
+  font-family: var(--font-pixel);
+}
+
+@layer components {
+  .pixel-border {
+    border-style: solid;
+    border-width: 4px;
+    border-color: var(--color-brown);
+    box-shadow: 4px 4px 0 0 var(--color-brown-dark);
+    image-rendering: pixelated;
+  }
+
+  .pixel-border-sage {
+    border-color: var(--color-sage-dark);
+    box-shadow: 4px 4px 0 0 var(--color-sage-dark);
+  }
+
+  .pixel-img {
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+  }
+
+  .enter-up {
+    animation: pixel-enter-up 0.4s ease-out both;
+  }
+}
+
+@keyframes pixel-enter-up {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.enter-delay-1 {
+  animation-delay: 0.08s;
+}
+.enter-delay-2 {
+  animation-delay: 0.16s;
+}
+.enter-delay-3 {
+  animation-delay: 0.24s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .enter-up {
+    animation: none;
+  }
+}
+
+* {
+  -webkit-tap-highlight-color: transparent;
+}
