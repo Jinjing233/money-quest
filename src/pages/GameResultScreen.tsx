@@ -4,22 +4,12 @@ import { analyzeGame } from "../data/analysis";
 import { EVENTS } from "../data/events";
 import { PixelCard } from "../components/PixelCard";
 import { PixelButton } from "../components/PixelButton";
-import { CharacterTurnaround } from "../components/CharacterTurnaround";
-import type { EndingId, CharacterVisualState } from "../types/game";
 import { translateUI, translateUITemplate } from "../i18n/ui";
 import { localizeEndingText, localizeEvent } from "../i18n/localize";
 
 interface GameResultScreenProps {
   onPlayAgain: () => void;
 }
-
-// A gentle, non-shaming mood per ending -- "Fell Into Debt" gets a
-// standing, concerned pose, never an exaggerated or mocking one.
-const ENDING_MOOD: Record<EndingId, CharacterVisualState> = {
-  stable: "happy",
-  scraping: "normal",
-  debt: "stressed",
-};
 
 export function GameResultScreen({ onPlayAgain }: GameResultScreenProps) {
   const {
@@ -53,21 +43,9 @@ export function GameResultScreen({ onPlayAgain }: GameResultScreenProps) {
       <PixelCard sage className="enter-up text-center">
         <p className="font-pixel text-[10px] text-sage-dark">{t("result.gameOver")}</p>
         <div className="relative mx-auto mt-2 h-32 w-32">
-          {/* Ending art is drawn at 128x128 native and shown at 128px (1:1), so
-              the character overlay is sized to its own 32px native width at
-              that same 1:1 scale (w-8 = 32px) -- not a guessed size. All
-              three endings share one house() layout (door at x57-71 of the
-              128px canvas), so the character stands just right of the door,
-              on the ground line, at the same spot in every ending. `bottom`
-              (not `top`) positioning means this still holds even though the
-              8-direction turnaround frames are taller than the old square
-              idle art -- the character's feet, not its head, stay pinned. */}
+          {/* Ending art is drawn at 128x128 native and shown at 128px (1:1) --
+              no character overlay here anymore, just the house illustration. */}
           <img src={`/assets/pixel/scenes/ending_${ending.id}.png`} alt="" className="pixel-img h-32 w-32" />
-          <CharacterTurnaround
-            characterId={character.id}
-            fallbackMood={ENDING_MOOD[ending.id]}
-            className="absolute bottom-[22%] left-[72%] w-8 -translate-x-1/2"
-          />
         </div>
         <h1 className="font-pixel mt-2 text-sm text-brown">{endingText.title}</h1>
         <p className="mt-3 text-left text-sm leading-relaxed text-brown-light">{endingText.message}</p>
