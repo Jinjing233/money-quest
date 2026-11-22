@@ -38,6 +38,8 @@ export function WelcomeScreen({ hasSave, onStart, onContinue }: WelcomeScreenPro
         alt=""
         className="pixel-img enter-up enter-delay-3 mt-2 w-full max-w-xs pixel-border"
       />
+
+      <p className="enter-up enter-delay-3 mt-1 text-[8px] text-brown-light/50">{t("welcome.musicCredit")}</p>
     </div>
   );
 }

@@ -66,6 +66,11 @@ export const UI_STRINGS = {
   "result.playAgain": { en: "Play Again", zh: "再玩一次" },
 
   "lang.toggle": { en: "中文", zh: "English" },
+
+  "welcome.musicCredit": {
+    en: "Music: \"Quiet Village\" by HoliznaCC0 (CC0 / Public Domain)",
+    zh: "音乐：《Quiet Village》作者 HoliznaCC0（CC0 公共领域）",
+  },
 } as const;
 
 export type UIStringKey = keyof typeof UI_STRINGS;
