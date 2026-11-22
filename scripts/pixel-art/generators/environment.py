@@ -140,6 +140,52 @@ def wall_art() -> PixelCanvas:
     return c
 
 
+def laptop() -> PixelCanvas:
+    c = PixelCanvas(32, 32)
+    c.rect(4, 18, 28, 22, P["brown_light"])      # base/keyboard
+    c.rect(6, 4, 26, 18, P["brown_dark"])        # screen bezel
+    c.rect(8, 6, 24, 16, P["sky"])               # screen glow
+    c.rect(9, 7, 17, 9, P["cream_light"])        # a little "document" on screen
+    c.auto_outline(OUTLINE)
+    return c
+
+
+def book_stack() -> PixelCanvas:
+    c = PixelCanvas(32, 32)
+    c.rect(4, 22, 28, 27, P["coral"])
+    c.rect(4, 22, 28, 23, P["coral_dark"])
+    c.rect(6, 16, 26, 21, P["sage"])
+    c.rect(6, 16, 26, 17, P["sage_dark"])
+    c.rect(8, 10, 24, 15, P["sky"])
+    c.rect(8, 10, 24, 11, P["sky_dark"])
+    c.auto_outline(OUTLINE)
+    return c
+
+
+def calendar() -> PixelCanvas:
+    c = PixelCanvas(32, 32)
+    c.rect(4, 4, 28, 28, P["cream_light"])
+    c.rect(4, 4, 28, 9, P["coral"])              # header band
+    c.rect(8, 2, 10, 6, P["brown_dark"])          # hangers
+    c.rect(22, 2, 24, 6, P["brown_dark"])
+    for gy in range(12, 25, 5):
+        for gx in range(7, 26, 6):
+            c.rect(gx, gy, gx + 3, gy + 2, P["sage"])
+    c.rect(13, 12, 16, 14, P["coral_dark"])       # one marked day
+    c.auto_outline(OUTLINE)
+    return c
+
+
+def mug() -> PixelCanvas:
+    c = PixelCanvas(32, 32)
+    c.rect(11, 16, 21, 26, P["cream_light"])
+    c.rect(11, 16, 21, 18, P["coral"])
+    c.rect(21, 18, 25, 23, P["cream_light"])
+    c.rect(22, 19, 24, 22, P["cream"])
+    c.auto_outline(OUTLINE)
+    return c
+
+
 PIECES = {
     "bed": bed,
     "desk": desk,
@@ -150,6 +196,10 @@ PIECES = {
     "cabinet": cabinet,
     "rug": rug,
     "wall_art": wall_art,
+    "laptop": laptop,
+    "book_stack": book_stack,
+    "calendar": calendar,
+    "mug": mug,
 }
 
 

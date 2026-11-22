@@ -1,9 +1,8 @@
-import type { PendingLesson } from "../types/game";
 import { PixelCard } from "./PixelCard";
 import { PixelButton } from "./PixelButton";
 
 interface FinancialLessonCardProps {
-  pendingLesson: PendingLesson;
+  pendingLesson: { eventTitle: string; lesson: string };
   onContinue: () => void;
 }
 

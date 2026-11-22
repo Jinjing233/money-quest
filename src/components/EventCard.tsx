@@ -1,5 +1,6 @@
 import { useState } from "react";
 import type { GameEvent } from "../types/game";
+import { useGameStore } from "../store/gameStore";
 import { PixelCard } from "./PixelCard";
 import { PixelButton } from "./PixelButton";
 import { eventCategoryIconPath } from "./eventCategoryIcons";
@@ -13,6 +14,7 @@ const SELECT_FEEDBACK_MS = 160;
 
 export function EventCard({ event, onChoose }: EventCardProps) {
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const character = useGameStore((state) => state.character);
 
   const handleChoose = (choiceId: string) => {
     if (selectedId) return;
@@ -25,6 +27,13 @@ export function EventCard({ event, onChoose }: EventCardProps) {
       <div className="flex items-center gap-2">
         <img src={eventCategoryIconPath(event.id)} alt="" className="pixel-img h-6 w-6 shrink-0" />
         <p className="font-pixel text-[10px] text-sage-dark">Day {event.day}</p>
+        {character && (
+          <img
+            src={`/assets/pixel/characters/character_${character.id}_portrait.png`}
+            alt=""
+            className="pixel-img ml-auto h-9 w-9 shrink-0"
+          />
+        )}
       </div>
       <h2 className="font-pixel mt-2 text-sm leading-relaxed text-brown">{event.title}</h2>
       <p className="mt-3 text-sm leading-relaxed text-brown-light">{event.description}</p>

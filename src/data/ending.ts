@@ -6,7 +6,10 @@ export interface EndingInfo {
   message: string;
 }
 
-const STABLE_BALANCE_MARGIN = 100;
+// Scaled up from V1 alongside the V2 Columbus-anchored economy (see
+// DATA_SOURCES.md) so "stable" still requires building a real cushion
+// relative to each character's own starting point, not an absolute number.
+const STABLE_BALANCE_MARGIN = 150;
 const STABLE_STRESS_CEILING = 65;
 
 export function resolveEnding(balance: number, stress: number, character: Character): EndingInfo {

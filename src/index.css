@@ -1,8 +1,11 @@
 @import "tailwindcss";
 
 @theme {
-  --font-pixel: "Press Start 2P", monospace;
-  --font-pixel-body: "VT323", monospace;
+  /* CJK fallback after the Latin pixel fonts (which have no Chinese
+     glyphs) so Chinese text gets a deliberate, readable system font
+     instead of whatever default the browser happens to fall back to. */
+  --font-pixel: "Press Start 2P", "PingFang SC", "Microsoft YaHei", monospace;
+  --font-pixel-body: "VT323", "PingFang SC", "Microsoft YaHei", sans-serif;
 
   --color-cream: #f3e3b3;
   --color-cream-light: #faf1d8;
@@ -21,9 +24,16 @@ body,
   height: 100%;
 }
 
+html,
+body {
+  overflow-x: hidden;
+}
+
 body {
   margin: 0;
   background-color: var(--color-cream);
+  background-image: url("/assets/pixel/patterns/wallpaper_tile.png");
+  background-size: 32px 32px;
   color: var(--color-brown);
   font-family: var(--font-pixel-body);
   image-rendering: pixelated;
@@ -41,6 +51,20 @@ body {
     border-color: var(--color-brown);
     box-shadow: 4px 4px 0 0 var(--color-brown-dark);
     image-rendering: pixelated;
+    clip-path: polygon(
+      6px 0, calc(100% - 6px) 0, 100% 6px,
+      100% calc(100% - 6px), calc(100% - 6px) 100%, 6px 100%,
+      0 calc(100% - 6px), 0 6px
+    );
+  }
+
+  .pixel-panel-header {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-family: var(--font-pixel);
+    font-size: 9px;
+    color: var(--color-sage-dark);
   }
 
   .pixel-border-sage {

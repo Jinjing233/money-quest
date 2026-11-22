@@ -1,4 +1,5 @@
 import { PixelButton } from "../components/PixelButton";
+import { LanguageToggle } from "../components/LanguageToggle";
 
 interface WelcomeScreenProps {
   hasSave: boolean;
@@ -8,7 +9,11 @@ interface WelcomeScreenProps {
 
 export function WelcomeScreen({ hasSave, onStart, onContinue }: WelcomeScreenProps) {
   return (
-    <div className="flex min-h-full flex-col items-center justify-center gap-6 px-6 py-12 text-center">
+    <div className="relative flex min-h-full flex-col items-center justify-center gap-6 px-6 py-12 text-center">
+      <div className="absolute right-4 top-4">
+        <LanguageToggle />
+      </div>
+
       <div className="enter-up">
         <h1 className="font-pixel text-2xl leading-relaxed text-brown sm:text-3xl">Money Quest</h1>
         <p className="font-pixel mt-3 text-[11px] text-sage-dark">Can you survive 30 days?</p>

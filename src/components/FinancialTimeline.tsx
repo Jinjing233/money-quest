@@ -30,7 +30,10 @@ export function FinancialTimeline() {
         <div className="fixed inset-0 z-30 flex items-center justify-center bg-black/40 px-4">
           <PixelCard className="max-h-[80vh] w-full max-w-sm overflow-y-auto">
             <div className="flex items-center justify-between">
-              <h2 className="font-pixel text-xs text-brown">Financial Timeline</h2>
+              <h2 className="font-pixel flex items-center gap-2 text-xs text-brown">
+                <img src="/assets/pixel/ui/bill.png" alt="" className="pixel-img h-5 w-5" />
+                Financial Timeline
+              </h2>
               <button onClick={() => setIsOpen(false)} className="font-pixel text-[10px] text-brown-light">
                 ✕
               </button>

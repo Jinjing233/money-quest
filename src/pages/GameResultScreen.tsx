@@ -3,10 +3,21 @@ import { resolveEnding } from "../data/ending";
 import { analyzeGame } from "../data/analysis";
 import { PixelCard } from "../components/PixelCard";
 import { PixelButton } from "../components/PixelButton";
+import { CharacterSprite } from "../components/CharacterSprite";
+import type { EndingId } from "../types/game";
+import type { Mood } from "../components/characterMood";
 
 interface GameResultScreenProps {
   onPlayAgain: () => void;
 }
+
+// A gentle, non-shaming mood per ending -- "Fell Into Debt" gets a
+// standing, concerned pose, never an exaggerated or mocking one.
+const ENDING_MOOD: Record<EndingId, Mood> = {
+  stable: "happy",
+  scraping: "normal",
+  debt: "stressed",
+};
 
 export function GameResultScreen({ onPlayAgain }: GameResultScreenProps) {
   const { character, balance, stress, energy, decisionHistory, dailyLog, transactions, emergencyFundBuilt } =
@@ -21,11 +32,14 @@ export function GameResultScreen({ onPlayAgain }: GameResultScreenProps) {
     <div className="mx-auto flex min-h-full max-w-sm flex-col gap-4 px-4 py-8">
       <PixelCard sage className="enter-up text-center">
         <p className="font-pixel text-[10px] text-sage-dark">Day 30 — Game Over</p>
-        <img
-          src={`/assets/pixel/scenes/ending_${ending.id}.png`}
-          alt=""
-          className="pixel-img mx-auto mt-2 h-32 w-32"
-        />
+        <div className="relative mx-auto mt-2 h-32 w-32">
+          <img src={`/assets/pixel/scenes/ending_${ending.id}.png`} alt="" className="pixel-img h-32 w-32" />
+          <CharacterSprite
+            characterId={character.id}
+            mood={ENDING_MOOD[ending.id]}
+            className="absolute bottom-3 left-1/2 w-10 -translate-x-1/2"
+          />
+        </div>
         <h1 className="font-pixel mt-2 text-sm text-brown">{ending.title}</h1>
         <p className="mt-3 text-left text-sm leading-relaxed text-brown-light">{ending.message}</p>
       </PixelCard>

@@ -32,7 +32,7 @@ EXPECTED_SIZES: dict[str, set[tuple[int, int]]] = {
 # Folders allowed to be fully opaque -- full-bleed scene illustrations,
 # unlike sprites/icons/furniture, are meant to fill their frame rather
 # than float with a transparent cutout.
-OPAQUE_OK = {"scenes"}
+OPAQUE_OK = {"scenes", "patterns"}
 
 
 def validate_file(path: Path) -> list[str]:

@@ -1,30 +1,69 @@
+import type { Character } from "../types/game";
+import { CharacterSprite } from "./CharacterSprite";
+import { deriveMood } from "./characterMood";
+
 interface ApartmentSceneProps {
+  character: Character | null;
   stress: number;
+  energy: number;
 }
 
-const asset = (name: string) => `/assets/pixel/environment/${name}.png`;
+const env = (name: string) => `/assets/pixel/environment/${name}.png`;
+const pattern = (name: string) => `/assets/pixel/patterns/${name}.png`;
 
-export function ApartmentScene({ stress }: ApartmentSceneProps) {
+export function ApartmentScene({ character, stress, energy }: ApartmentSceneProps) {
   const moody = stress >= 60;
+  const mood = deriveMood(stress, energy);
 
   return (
     <div
-      className="pixel-border relative h-56 w-full overflow-hidden"
-      style={{ backgroundColor: moody ? "#d8c994" : "#f3e3b3" }}
+      className="pixel-border relative h-64 w-full overflow-hidden sm:h-72"
       role="img"
       aria-label="Pixel art apartment room"
     >
-      <div className="absolute inset-x-0 bottom-0 h-[30%]" style={{ backgroundColor: "#a9835f" }} />
+      {/* wallpaper */}
+      <div
+        className="pixel-img absolute inset-x-0 top-0 h-[70%]"
+        style={{
+          backgroundImage: `url(${pattern("wallpaper_tile.png")})`,
+          backgroundSize: "32px 32px",
+          imageRendering: "pixelated",
+          filter: moody ? "brightness(0.9) saturate(0.85)" : undefined,
+        }}
+      />
+      {/* floor */}
+      <div
+        className="pixel-img absolute inset-x-0 bottom-0 h-[30%]"
+        style={{
+          backgroundImage: `url(${pattern("floor_tile.png")})`,
+          backgroundSize: "32px 32px",
+          imageRendering: "pixelated",
+        }}
+      />
+      <div className="absolute inset-x-0 top-[68%] h-[4%] bg-sage-dark/70" />
 
-      <img src={asset("rug")} alt="" className="pixel-img absolute bottom-[4%] left-[16%] w-[48%]" />
-      <img src={asset("window")} alt="" className="pixel-img absolute left-[6%] top-[6%] w-[20%]" />
-      <img src={asset("wall_art")} alt="" className="pixel-img absolute left-[72%] top-[8%] w-[16%]" />
-      <img src={asset("cabinet")} alt="" className="pixel-img absolute bottom-[6%] left-[2%] w-[13%]" />
-      <img src={asset("bed")} alt="" className="pixel-img absolute bottom-[4%] right-[3%] w-[38%]" />
-      <img src={asset("desk")} alt="" className="pixel-img absolute bottom-[7%] left-[22%] w-[26%]" />
-      <img src={asset("chair")} alt="" className="pixel-img absolute bottom-[5%] left-[36%] w-[13%]" />
-      <img src={asset("lamp")} alt="" className="pixel-img absolute bottom-[32%] left-[26%] w-[9%]" />
-      <img src={asset("plant")} alt="" className="pixel-img absolute bottom-[7%] right-[42%] w-[13%]" />
+      <img src={env("window")} alt="" className="pixel-img absolute left-[5%] top-[5%] w-[18%]" />
+      <img src={env("calendar")} alt="" className="pixel-img absolute left-[27%] top-[6%] w-[13%]" />
+      <img src={env("wall_art")} alt="" className="pixel-img absolute left-[74%] top-[6%] w-[15%]" />
+
+      <img src={env("rug")} alt="" className="pixel-img absolute bottom-[5%] left-[14%] w-[46%]" />
+      <img src={env("cabinet")} alt="" className="pixel-img absolute bottom-[6%] left-[2%] w-[12%]" />
+      <img src={env("mug")} alt="" className="pixel-img absolute bottom-[34%] left-[3.5%] w-[5%]" />
+      <img src={env("bed")} alt="" className="pixel-img absolute bottom-[4%] right-[2%] w-[34%]" />
+      <img src={env("book_stack")} alt="" className="pixel-img absolute bottom-[5%] right-[1%] w-[9%]" />
+      <img src={env("desk")} alt="" className="pixel-img absolute bottom-[7%] left-[36%] w-[24%]" />
+      <img src={env("laptop")} alt="" className="pixel-img absolute bottom-[22%] left-[41%] w-[10%]" />
+      <img src={env("chair")} alt="" className="pixel-img absolute bottom-[5%] left-[48%] w-[11%]" />
+      <img src={env("lamp")} alt="" className="pixel-img absolute bottom-[30%] left-[38%] w-[8%]" />
+      <img src={env("plant")} alt="" className="pixel-img absolute bottom-[6%] right-[38%] w-[11%]" />
+
+      {character && (
+        <CharacterSprite
+          characterId={character.id}
+          mood={mood}
+          className="absolute bottom-[6%] left-[20%] w-[12%] drop-shadow-sm"
+        />
+      )}
     </div>
   );
 }

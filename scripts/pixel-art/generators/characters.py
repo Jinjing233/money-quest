@@ -11,6 +11,13 @@ The portrait is literally a cropped, 2x nearest-neighbor upscale of the
 head+shoulders of the same sprite (see canvas.make_portrait) -- so
 there is no separate portrait drawing to keep in sync.
 
+Also generates a 2-frame mood variant per character -- happy / normal
+/ stressed / exhausted -- for the in-apartment character sprite. These
+reuse the exact same base draw routine and color recipe; only a few
+regions (eyes, mouth, one arm, head offset) change per mood, so the
+four moods stay visibly the same character. Frame 0/1 is a tiny idle
+loop (a 1-2px shift), not a full animation.
+
 Run from the project root:
     python scripts/pixel-art/generators/characters.py
 """
@@ -35,39 +42,91 @@ PREVIEW_DIR = TOOLS_DIR / "previews"
 SIZE = 32
 OUTLINE = P["brown_dark"]
 
+MOODS = ("happy", "normal", "stressed", "exhausted")
+FRAMES = (0, 1)
 
-def draw_character(hair: tuple, hair_highlight: tuple, outfit: tuple, outfit_shadow: tuple, pants: tuple) -> PixelCanvas:
+
+def draw_character(
+    hair: tuple, hair_highlight: tuple, outfit: tuple, outfit_shadow: tuple, pants: tuple,
+    mood: str = "normal", frame: int = 0,
+) -> PixelCanvas:
     c = PixelCanvas(SIZE, SIZE)
 
+    # exhausted: the whole head slumps down a couple of pixels; frame 1 nods a bit further.
+    head_drop = 0
+    if mood == "exhausted":
+        head_drop = 2 + frame
+    hcy, fcy = 11 + head_drop, 13 + head_drop
+
     # head: hair silhouette carved by a smaller face circle -> bowl-cut
-    c.circle(16, 11, 9, hair)
-    c.circle(16, 13, 7, P["skin"])
-    c.recolor(7, 2, 15, 9, hair, hair_highlight)          # hair highlight, upper-left light
-    c.recolor(9, 9, 22, 11, P["skin"], hair)               # bangs over the forehead
-    c.recolor(10, 12, 13, 15, P["skin"], P["skin_light"])  # face highlight, upper-left
+    c.circle(16, hcy, 9, hair)
+    c.circle(16, fcy, 7, P["skin"])
+    c.recolor(7, 2 + head_drop, 15, 9 + head_drop, hair, hair_highlight)
+    c.recolor(9, fcy - 4, 22, fcy - 2, P["skin"], hair)               # bangs
+    c.recolor(10, fcy - 1, 13, fcy + 2, P["skin"], P["skin_light"])   # face highlight
 
-    # eyes + sparkle
-    for ex in (12, 19):
-        c.rect(ex, 14, ex + 1, 15, OUTLINE)
-    c.set(12, 14, P["cream_light"])
-    c.set(19, 14, P["cream_light"])
+    eye_y = fcy + 1
+    if mood == "exhausted":
+        # thin half-closed lines instead of open eyes
+        c.rect(12, eye_y, 13, eye_y, OUTLINE)
+        c.rect(19, eye_y, 20, eye_y, OUTLINE)
+    else:
+        for ex in (12, 19):
+            c.rect(ex, eye_y, ex + 1, eye_y + 1, OUTLINE)
+        c.set(12, eye_y, P["cream_light"])
+        c.set(19, eye_y, P["cream_light"])
 
-    # blush cheeks
-    c.set(11, 16, P["coral"])
-    c.set(20, 16, P["coral"])
+    if mood == "stressed":
+        c.set(12, eye_y - 2, OUTLINE)
+        c.set(19, eye_y - 2, OUTLINE)
 
-    # mouth
-    c.rect(15, 18, 16, 18, OUTLINE)
+    # blush cheeks (skip on exhausted -- a tired face reads better without them)
+    if mood != "exhausted":
+        c.set(11, fcy + 3, P["coral"])
+        c.set(20, fcy + 3, P["coral"])
 
-    # body: top, shadow, sleeves + hands
-    c.rect(11, 21, 20, 27, outfit)
-    c.rect(17, 24, 20, 27, outfit_shadow)
-    c.rect(9, 22, 10, 26, outfit)
-    c.rect(21, 22, 22, 26, outfit)
-    c.rect(9, 26, 10, 27, P["skin"])
-    c.rect(21, 26, 22, 27, P["skin"])
+    mouth_y = fcy + 5
+    if mood == "happy":
+        c.rect(14, mouth_y, 17, mouth_y, OUTLINE)
+        c.set(14, mouth_y - 1, OUTLINE)
+        c.set(17, mouth_y - 1, OUTLINE)
+    elif mood == "stressed":
+        c.rect(14, mouth_y, 15, mouth_y, OUTLINE)
+        c.rect(16, mouth_y - 1, 17, mouth_y - 1, OUTLINE)
+    elif mood == "exhausted":
+        c.set(15, mouth_y, OUTLINE)
+    else:
+        c.rect(15, mouth_y, 16, mouth_y, OUTLINE)
 
-    # legs + shoes
+    body_top = 21 + head_drop
+    body_bot = 27 + head_drop
+
+    # body: top, shadow
+    c.rect(11, body_top, 20, body_bot, outfit)
+    c.rect(17, body_top + 3, 20, body_bot, outfit_shadow)
+
+    if mood == "stressed":
+        # left arm stays put; right arm rises along the outside edge of
+        # the head to a hand resting at the temple -- the universal
+        # "overwhelmed" pose. frame 1 nudges the hand up a pixel.
+        c.rect(9, body_top, 10, body_top + 4, outfit)
+        c.rect(23, body_top - 9 - frame, 25, body_top + 1, outfit)
+        c.rect(23, body_top - 13 - frame, 26, body_top - 9 - frame, P["skin"])
+    else:
+        # happy: both arms raised in a little cheer, higher still on frame 1.
+        # exhausted: arms droop. normal: a tiny 1px idle breathing bob.
+        if mood == "happy":
+            lift = 3 + frame
+        elif mood == "exhausted":
+            lift = -1
+        else:
+            lift = -frame
+        c.rect(9, body_top + 1 - lift, 10, body_top + 5 - lift, outfit)
+        c.rect(21, body_top + 1 - lift, 22, body_top + 5 - lift, outfit)
+        c.rect(9, body_top + 5 - lift, 10, body_top + 6 - lift, P["skin"])
+        c.rect(21, body_top + 5 - lift, 22, body_top + 6 - lift, P["skin"])
+
+    # legs + shoes (fixed to the floor regardless of mood/frame)
     c.rect(12, 28, 14, 29, pants)
     c.rect(17, 28, 19, 29, pants)
     c.rect(11, 30, 14, 30, OUTLINE)
@@ -109,6 +168,14 @@ def main() -> None:
         ).save(PREVIEW_DIR / f"character_{char_id}_portrait_preview.png")
 
         print(f"{char_id}: {sprite_path.name}  {portrait_path.name}")
+
+        for mood in MOODS:
+            for frame in FRAMES:
+                mood_sprite = draw_character(**colors, mood=mood, frame=frame)
+                name = f"character_{char_id}_{mood}_{frame}"
+                mood_sprite.save(OUT_DIR / f"{name}.png")
+                mood_sprite.save_preview(PREVIEW_DIR / f"{name}_preview.png")
+        print(f"{char_id}: + {len(MOODS)} moods x {len(FRAMES)} frames")
 
 
 if __name__ == "__main__":

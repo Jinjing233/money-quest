@@ -2,6 +2,7 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { Character, GamePhase, GameState } from "../types/game";
 import { EVENTS } from "../data/events";
+import { computeCharacterState } from "../data/characterState";
 
 const clamp = (value: number) => Math.min(100, Math.max(0, value));
 
@@ -18,21 +19,24 @@ interface GameActions {
   chooseOption: (choiceId: string) => void;
   acknowledgeLesson: () => void;
   resetGame: () => void;
+  setLanguage: (language: GameState["language"]) => void;
 }
 
 const initialState: GameState = {
   phase: "welcome",
+  language: "en",
   character: null,
   day: 1,
   balance: 0,
   stress: 0,
   energy: 100,
+  characterState: "normal",
   income: null,
   rent: null,
   transactions: [],
   decisionHistory: [],
   activeEvent: null,
-  pendingLesson: null,
+  showLesson: false,
   scheduledCharges: [],
   emergencyFundBuilt: false,
   dailyLog: [],
@@ -45,6 +49,8 @@ export const useGameStore = create<GameState & GameActions>()(
 
       goTo: (phase) => set({ phase }),
 
+      setLanguage: (language) => set({ language }),
+
       startNewGame: (character) =>
         set({
           phase: "home",
@@ -53,12 +59,13 @@ export const useGameStore = create<GameState & GameActions>()(
           balance: character.startingBalance,
           stress: character.startingStress,
           energy: character.startingEnergy,
+          characterState: computeCharacterState(character.startingStress, character.startingEnergy),
           income: { ...character.income },
           rent: { ...character.rent },
           transactions: [],
           decisionHistory: [],
           activeEvent: null,
-          pendingLesson: null,
+          showLesson: false,
           scheduledCharges: [],
           emergencyFundBuilt: false,
           dailyLog: [],
@@ -104,14 +111,14 @@ export const useGameStore = create<GameState & GameActions>()(
           if (income && nextDay >= income.nextDueDay) {
             balance += income.amount;
             dayIncome += income.amount;
-            transactions.push({ day: nextDay, label: income.label, amount: income.amount });
+            transactions.push({ day: nextDay, label: income.label, amount: income.amount, source: { kind: "income", id: income.id } });
             income = { ...income, nextDueDay: income.nextDueDay + income.everyDays };
           }
 
           if (rent && nextDay >= rent.nextDueDay) {
             balance -= rent.amount;
             dayExpenses += rent.amount;
-            transactions.push({ day: nextDay, label: rent.label, amount: -rent.amount });
+            transactions.push({ day: nextDay, label: rent.label, amount: -rent.amount, source: { kind: "rent", id: rent.id } });
             rent = { ...rent, nextDueDay: rent.nextDueDay + rent.everyDays };
           }
 
@@ -121,12 +128,22 @@ export const useGameStore = create<GameState & GameActions>()(
             balance += charge.amount;
             if (charge.amount >= 0) dayIncome += charge.amount;
             else dayExpenses += -charge.amount;
-            transactions.push({ day: nextDay, label: charge.label, amount: charge.amount });
+            transactions.push({ day: nextDay, label: charge.label, amount: charge.amount, source: { kind: "scheduled", id: charge.key } });
           }
 
-          const activeEvent = EVENTS.find((event) => event.day === nextDay) ?? null;
+          const conditionCtx = {
+            balance,
+            stress: state.stress,
+            energy: state.energy,
+            decisionHistory: state.decisionHistory,
+            emergencyFundBuilt: state.emergencyFundBuilt,
+          };
+          const activeEvent =
+            EVENTS.find((event) => event.day === nextDay && (!event.condition || event.condition(conditionCtx))) ?? null;
           const burnoutPenalty = state.energy <= 0 ? BURNOUT_STRESS_PENALTY : 0;
           const stressDelta = DAILY_STRESS_DRIFT + burnoutPenalty;
+          const stress = clamp(state.stress + stressDelta);
+          const energy = clamp(state.energy + DAILY_ENERGY_DRIFT);
 
           const dailyLog = [
             ...state.dailyLog,
@@ -144,8 +161,9 @@ export const useGameStore = create<GameState & GameActions>()(
             ...state,
             day: nextDay,
             balance,
-            stress: clamp(state.stress + stressDelta),
-            energy: clamp(state.energy + DAILY_ENERGY_DRIFT),
+            stress,
+            energy,
+            characterState: computeCharacterState(stress, energy, state.characterState),
             transactions,
             income,
             rent,
@@ -170,7 +188,15 @@ export const useGameStore = create<GameState & GameActions>()(
           }
 
           const transactions = balanceChange
-            ? [...state.transactions, { day: state.day, label: `${event.title} — ${choice.label}`, amount: balanceChange }]
+            ? [
+                ...state.transactions,
+                {
+                  day: state.day,
+                  label: `${event.title} — ${choice.label}`,
+                  amount: balanceChange,
+                  source: { kind: "event" as const, id: event.id, choiceId: choice.id },
+                },
+              ]
             : state.transactions;
 
           const income =
@@ -189,6 +215,7 @@ export const useGameStore = create<GameState & GameActions>()(
                 {
                   day: state.day + choice.schedule.delayDays,
                   label: choice.schedule.label,
+                  key: choice.schedule.key,
                   amount: choice.schedule.amount,
                 },
               ]
@@ -220,6 +247,7 @@ export const useGameStore = create<GameState & GameActions>()(
             balance,
             stress,
             energy,
+            characterState: computeCharacterState(stress, energy, state.characterState),
             transactions,
             income,
             rent,
@@ -230,24 +258,26 @@ export const useGameStore = create<GameState & GameActions>()(
               ...state.decisionHistory,
               {
                 day: state.day,
+                eventId: event.id,
+                choiceId: choice.id,
                 eventTitle: event.title,
                 choiceLabel: choice.label,
                 effects: choice.effects,
                 deferred: !!choice.schedule,
               },
             ],
-            pendingLesson: { eventTitle: event.title, lesson: event.lesson },
+            showLesson: true,
           };
         }),
 
       acknowledgeLesson: () =>
-        set((state) => ({ ...state, activeEvent: null, pendingLesson: null, phase: "home" })),
+        set((state) => ({ ...state, activeEvent: null, showLesson: false, phase: "home" })),
 
-      resetGame: () => set(initialState),
+      resetGame: () => set((state) => ({ ...initialState, language: state.language })),
     }),
     {
       name: "money-quest-save",
-      version: 1,
+      version: 2,
       // Any save written by an older schema version gets discarded in favor of a fresh
       // start rather than risk rendering with missing/mismatched fields.
       migrate: () => ({ ...initialState }),
