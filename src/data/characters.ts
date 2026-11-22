@@ -25,16 +25,6 @@ export const CHARACTERS: Character[] = [
     income: { id: "parttime-pay", label: "Part-time pay", amount: 300, everyDays: 7, nextDueDay: 7 },
     rent: { id: "shared-rent", label: "Shared rent", amount: 680, everyDays: 30, nextDueDay: 30 },
   },
-  {
-    id: "gig",
-    name: "Gig Worker",
-    tagline: "Your schedule is yours. Your income has other plans.",
-    startingBalance: 250,
-    startingEnergy: 65,
-    startingStress: 35,
-    income: { id: "gig-earnings", label: "Gig earnings", amount: 350, everyDays: 7, nextDueDay: 7 },
-    rent: { id: "rent", label: "Rent", amount: 900, everyDays: 30, nextDueDay: 30 },
-  },
   // Unlockable bonus/relaxed-mode character -- see data/unlocks.ts. Still plays the
   // full 30-day event system; the cushion just comes from a bigger head start and
   // one free save, not from events being skipped or outcomes being guaranteed.

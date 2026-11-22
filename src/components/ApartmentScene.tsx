@@ -18,12 +18,17 @@ const ROOM_WIDTH = 1448;
 const ROOM_HEIGHT = 1086;
 // centerX/footY pin the sprite's horizontal center and ground-contact
 // line -- not its top-left corner -- so a sprite's actual rendered
-// height (which now varies: 32x32 for the three flat-style characters,
-// 32x44 for the Fresh Graduate's new taller art) never changes where
-// its feet land. The image is never forced to a square box (that would
-// stretch a non-square source); width is set and height follows the
-// source's own aspect ratio automatically.
-const CHARACTER_SPOT = { centerX: 725, footY: 780, w: 150 };
+// height (which varies per character: 32x32 for the flat-style ones,
+// 32x44 / 38x44 / 28x44 for the new taller PixelLab art) never changes
+// where its feet land. The image is never forced to a square box (that
+// would stretch a non-square source); width is set and height follows
+// the source's own aspect ratio automatically. Same spot/scale for
+// every character -- not tuned per-character -- so this is the one
+// place to adjust if a given character ever looks off.
+// w went 150 -> 195 (+30%, within the requested 20-35% range) to read
+// better against the room's furniture; still well clear of the desk,
+// sofa and armchair on either side of the rug at this width.
+const CHARACTER_SPOT = { centerX: 725, footY: 780, w: 195 };
 
 export function ApartmentScene({ character, characterState, stress }: ApartmentSceneProps) {
   const moody = stress >= 60;

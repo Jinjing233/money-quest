@@ -9,8 +9,8 @@ can check our homework.
 We picked one real U.S. metro and scaled every character and event to it,
 instead of inventing round numbers. Columbus is a commonly cited "typical
 mid-size American city" in cost-of-living writeups, which is exactly the kind
-of place our three characters (recent grad, student, gig worker) would
-actually be starting out in.
+of place our starting characters (recent grad, student) would actually be
+starting out in.
 
 ## Primary sources
 
@@ -69,20 +69,25 @@ rather than inventing an uncited number.
   commonly fall short of a calculated living wage), not a game-balance trick.
   See each character's `incomeAsShareOfLivingWage` note below.
 
-## The three characters (V2)
+## The starting characters (V2)
 
 | Character | Start $ | Income / wk | % of OH living wage ($815/wk) | Rent / mo | Housing situation |
 |---|---|---|---|---|---|
 | Fresh Graduate | $600 | $420 | ~52% | $1,100 | Solo 1BR (≈ Columbus 1BR avg) |
 | Working Student | $400 | $300 | ~37% | $680 | Shared 2BR, half the rent |
-| Gig Worker | $250 | $350 (volatile) | ~43% | $900 | Modest solo 1BR, older building |
 
-No character's numbers are tuned to guarantee an ending. All three were
+No character's numbers are tuned to guarantee an ending. Both were
 re-simulated against low-risk, mixed, and high-risk play patterns (see
 `scripts/` history during development) and each can reach *Financially
 Stable*, *Scraping By*, or *Fell Into Debt* depending on choices — including
-the weakest starting position (Gig Worker) reaching Stable with careful play,
-and the strongest (Fresh Graduate) falling into debt with reckless play.
+the weaker starting position (Working Student) reaching Stable with careful
+play, and the stronger one (Fresh Graduate) falling into debt with reckless
+play.
+
+A third, unlockable character (Trust Fund Kid) exists as a reward/relaxed-mode
+option once a player has reached both *Scraping By* and *Fell Into Debt* — see
+`data/unlocks.ts` and `data/characters.ts`. Its numbers are a deliberate
+head-start, not part of this cost-of-living model.
 
 ## What this is not
 

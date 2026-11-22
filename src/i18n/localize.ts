@@ -43,7 +43,6 @@ export function localizeRecurringLabel(id: string, fallbackLabel: string, langua
   const byId: Record<string, string> = {
     paycheck: ZH_CHARACTERS.graduate.incomeLabel,
     "parttime-pay": ZH_CHARACTERS.student.incomeLabel,
-    "gig-earnings": ZH_CHARACTERS.gig.incomeLabel,
     rent: ZH_CHARACTERS.graduate.rentLabel,
     "shared-rent": ZH_CHARACTERS.student.rentLabel,
     "family-allowance": ZH_CHARACTERS.trust_fund.incomeLabel,

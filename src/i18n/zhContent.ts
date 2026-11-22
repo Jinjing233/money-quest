@@ -28,12 +28,6 @@ export const ZH_CHARACTERS: Record<string, { name: string; tagline: string; inco
     incomeLabel: "兼职工资",
     rentLabel: "合租房租",
   },
-  gig: {
-    name: "零工",
-    tagline: "时间表是自己的，收入可完全不这么想。",
-    incomeLabel: "零工收入",
-    rentLabel: "房租",
-  },
   trust_fund: {
     name: "富二代",
     tagline: "爸妈说先别太拼，先把生活过明白。",
