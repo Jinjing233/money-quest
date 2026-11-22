@@ -1,8 +1,10 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import type { Character, GamePhase, GameState } from "../types/game";
+import type { Character, EndingId, GamePhase, GameState } from "../types/game";
 import { EVENTS } from "../data/events";
 import { computeCharacterState } from "../data/characterState";
+import { resolveEnding } from "../data/ending";
+import { translateUI } from "../i18n/ui";
 
 const clamp = (value: number) => Math.min(100, Math.max(0, value));
 
@@ -11,6 +13,19 @@ const DAILY_ENERGY_DRIFT = -1;
 const BURNOUT_STRESS_PENALTY = 1;
 const LAST_DAY = 30;
 const EMERGENCY_FUND_CUSHION = 60;
+const FAMILY_SAFETY_NET_AMOUNT = 300;
+
+/** Records this run's ending in the save's cross-playthrough history, and flags it when
+ * that's the ending that just completes the Trust Fund Kid unlock (see data/unlocks.ts). */
+function resolveEndingAndUnlock(state: GameState, balance: number) {
+  if (!state.character) return {};
+  const ending = resolveEnding(balance, state.stress, state.character);
+  const hadEnding = (id: EndingId) => state.achievedEndings.includes(id);
+  const wasUnlocked = hadEnding("scraping") && hadEnding("debt");
+  const achievedEndings = hadEnding(ending.id) ? state.achievedEndings : [...state.achievedEndings, ending.id];
+  const isUnlockedNow = achievedEndings.includes("scraping") && achievedEndings.includes("debt");
+  return { achievedEndings, justUnlockedTrustFund: !wasUnlocked && isUnlockedNow };
+}
 
 interface GameActions {
   goTo: (phase: GamePhase) => void;
@@ -40,6 +55,9 @@ const initialState: GameState = {
   scheduledCharges: [],
   emergencyFundBuilt: false,
   dailyLog: [],
+  achievedEndings: [],
+  familySafetyNetUsed: false,
+  justUnlockedTrustFund: false,
 };
 
 export const useGameStore = create<GameState & GameActions>()(
@@ -69,6 +87,8 @@ export const useGameStore = create<GameState & GameActions>()(
           scheduledCharges: [],
           emergencyFundBuilt: false,
           dailyLog: [],
+          familySafetyNetUsed: false,
+          justUnlockedTrustFund: false,
         }),
 
       advanceDay: () =>
@@ -78,7 +98,7 @@ export const useGameStore = create<GameState & GameActions>()(
           if (state.day >= LAST_DAY) {
             // Sweep any charge that never got a chance to land so nothing silently vanishes.
             if (state.scheduledCharges.length === 0) {
-              return { ...state, phase: "result" };
+              return { ...state, phase: "result", ...resolveEndingAndUnlock(state, state.balance) };
             }
             const sweptIncome = state.scheduledCharges
               .filter((c) => c.amount > 0)
@@ -97,7 +117,14 @@ export const useGameStore = create<GameState & GameActions>()(
                 balanceAfter: balance,
               };
             }
-            return { ...state, balance, scheduledCharges: [], dailyLog, phase: "result" };
+            return {
+              ...state,
+              balance,
+              scheduledCharges: [],
+              dailyLog,
+              phase: "result",
+              ...resolveEndingAndUnlock(state, balance),
+            };
           }
 
           const nextDay = state.day + 1;
@@ -131,6 +158,21 @@ export const useGameStore = create<GameState & GameActions>()(
             transactions.push({ day: nextDay, label: charge.label, amount: charge.amount, source: { kind: "scheduled", id: charge.key } });
           }
 
+          let familySafetyNetUsed = state.familySafetyNetUsed;
+          let familySafetyNetNote: string | undefined;
+          if (state.character?.hasFamilySafetyNet && !familySafetyNetUsed && state.balance >= 0 && balance < 0) {
+            balance += FAMILY_SAFETY_NET_AMOUNT;
+            dayIncome += FAMILY_SAFETY_NET_AMOUNT;
+            familySafetyNetUsed = true;
+            transactions.push({
+              day: nextDay,
+              label: "Family Safety Net",
+              amount: FAMILY_SAFETY_NET_AMOUNT,
+              source: { kind: "passive", id: "family-safety-net" },
+            });
+            familySafetyNetNote = translateUI("passive.familySafetyNet.notice", state.language);
+          }
+
           const conditionCtx = {
             balance,
             stress: state.stress,
@@ -154,6 +196,7 @@ export const useGameStore = create<GameState & GameActions>()(
               stressDelta,
               energyDelta: DAILY_ENERGY_DRIFT,
               balanceAfter: balance,
+              note: familySafetyNetNote,
             },
           ];
 
@@ -170,6 +213,7 @@ export const useGameStore = create<GameState & GameActions>()(
             scheduledCharges,
             activeEvent,
             dailyLog,
+            familySafetyNetUsed,
             phase: activeEvent ? "event" : "home",
           };
         }),
@@ -187,7 +231,7 @@ export const useGameStore = create<GameState & GameActions>()(
             balanceChange = Math.min(0, balanceChange + EMERGENCY_FUND_CUSHION);
           }
 
-          const transactions = balanceChange
+          let transactions = balanceChange
             ? [
                 ...state.transactions,
                 {
@@ -224,21 +268,39 @@ export const useGameStore = create<GameState & GameActions>()(
           const emergencyFundBuilt =
             event.id === "tax-refund" && choiceId === "save" ? true : state.emergencyFundBuilt;
 
-          const balance = state.balance + balanceChange;
+          let balance = state.balance + balanceChange;
           const stress = clamp(state.stress + (choice.effects.stress ?? 0));
           const energy = clamp(state.energy + (choice.effects.energy ?? 0));
+
+          let familySafetyNetUsed = state.familySafetyNetUsed;
+          let familySafetyNetBonus = 0;
+          if (state.character?.hasFamilySafetyNet && !familySafetyNetUsed && state.balance >= 0 && balance < 0) {
+            familySafetyNetBonus = FAMILY_SAFETY_NET_AMOUNT;
+            balance += familySafetyNetBonus;
+            familySafetyNetUsed = true;
+            transactions = [
+              ...transactions,
+              {
+                day: state.day,
+                label: "Family Safety Net",
+                amount: familySafetyNetBonus,
+                source: { kind: "passive" as const, id: "family-safety-net" },
+              },
+            ];
+          }
 
           const dailyLog = [...state.dailyLog];
           const lastEntry = dailyLog[dailyLog.length - 1];
           if (lastEntry && lastEntry.day === state.day) {
             dailyLog[dailyLog.length - 1] = {
               ...lastEntry,
-              income: lastEntry.income + (balanceChange > 0 ? balanceChange : 0),
+              income: lastEntry.income + (balanceChange > 0 ? balanceChange : 0) + familySafetyNetBonus,
               expenses: lastEntry.expenses + (balanceChange < 0 ? -balanceChange : 0),
               stressDelta: lastEntry.stressDelta + (choice.effects.stress ?? 0),
               energyDelta: lastEntry.energyDelta + (choice.effects.energy ?? 0),
               balanceAfter: balance,
               decisionLabel: choice.label,
+              note: familySafetyNetBonus ? translateUI("passive.familySafetyNet.notice", state.language) : lastEntry.note,
             };
           }
 
@@ -254,6 +316,7 @@ export const useGameStore = create<GameState & GameActions>()(
             scheduledCharges,
             emergencyFundBuilt,
             dailyLog,
+            familySafetyNetUsed,
             decisionHistory: [
               ...state.decisionHistory,
               {
@@ -273,11 +336,12 @@ export const useGameStore = create<GameState & GameActions>()(
       acknowledgeLesson: () =>
         set((state) => ({ ...state, activeEvent: null, showLesson: false, phase: "home" })),
 
-      resetGame: () => set((state) => ({ ...initialState, language: state.language })),
+      resetGame: () =>
+        set((state) => ({ ...initialState, language: state.language, achievedEndings: state.achievedEndings })),
     }),
     {
       name: "money-quest-save",
-      version: 2,
+      version: 3,
       // Any save written by an older schema version gets discarded in favor of a fresh
       // start rather than risk rendering with missing/mismatched fields.
       migrate: () => ({ ...initialState }),

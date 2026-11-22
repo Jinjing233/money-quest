@@ -2,10 +2,13 @@
 
 @theme {
   /* CJK fallback after the Latin pixel fonts (which have no Chinese
-     glyphs) so Chinese text gets a deliberate, readable system font
-     instead of whatever default the browser happens to fall back to. */
-  --font-pixel: "Press Start 2P", "PingFang SC", "Microsoft YaHei", monospace;
-  --font-pixel-body: "VT323", "PingFang SC", "Microsoft YaHei", sans-serif;
+     glyphs): DotGothic16 is a dot-matrix/pixel-style CJK font, so Chinese
+     text gets its own pixel-ish look instead of borrowing the Latin pixel
+     fonts (which lack Chinese glyphs entirely) or falling back to a plain
+     system UI font. PingFang SC / Microsoft YaHei stay as a readable
+     fallback if the web font hasn't loaded yet. */
+  --font-pixel: "Press Start 2P", "DotGothic16", "PingFang SC", "Microsoft YaHei", monospace;
+  --font-pixel-body: "VT323", "DotGothic16", "PingFang SC", "Microsoft YaHei", sans-serif;
 
   --color-cream: #f3e3b3;
   --color-cream-light: #faf1d8;

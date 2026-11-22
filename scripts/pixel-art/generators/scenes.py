@@ -17,13 +17,15 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from canvas import PixelCanvas  # noqa: E402
+from canvas import PixelCanvas, Scene  # noqa: E402
 from palette import PALETTE as P  # noqa: E402
 
 TOOLS_DIR = Path(__file__).resolve().parents[1]
 PROJECT_ROOT = TOOLS_DIR.parents[1]
 OUT_DIR = PROJECT_ROOT / "public" / "assets" / "pixel" / "scenes"
 PREVIEW_DIR = TOOLS_DIR / "previews"
+CHAR_DIR = PROJECT_ROOT / "public" / "assets" / "pixel" / "characters"
+ENV_DIR = PROJECT_ROOT / "public" / "assets" / "pixel" / "environment"
 
 OUTLINE = P["brown_dark"]
 
@@ -61,24 +63,59 @@ def coin(c: PixelCanvas, cx: int, cy: int, r: int = 4) -> None:
     c.set(cx - 1, cy - 1, P["cream_light"])
 
 
-def welcome_bg() -> PixelCanvas:
-    c = PixelCanvas(160, 90)
-    c.rect(0, 0, 159, 62, P["cream"])            # warm evening sky
-    c.rect(0, 62, 159, 89, P["brown_light"])     # ground
-    c.rect(0, 62, 159, 64, P["sage_dark"])       # thin grass line
+def welcome_bg() -> Scene:
+    """The Welcome Screen hero image.
 
-    c.circle(140, 14, 7, P["gold"])              # sun
-    coin(c, 20, 20, 4)
-    coin(c, 46, 12, 3)
+    Scene Brief: Welcome screen, first thing the player sees. Core
+    message = "independent life + money pressure + daily financial
+    choices". Subject = the young person, not the building. The
+    apartment building is background-only context (small, pushed to a
+    far corner), never competing with the character for visual weight.
 
-    tree(c, 12, 78, size=1)
-    house(c, 22, 82, 26, 22, 12, P["brown_light"], P["brown"], lit=True)
-    house(c, 58, 86, 34, 28, 16, P["cream_light"], P["brown_dark"], lit=True)
-    house(c, 104, 84, 28, 24, 13, P["sage"], P["sage_dark"], lit=False)
-    tree(c, 142, 82, size=1)
+    Composition Plan: eye-level scene, 256x128. Character pasted at a
+    clean 2x scale from the real sprite (same native grid as every
+    other asset). Exactly one foreground prop carries the "money
+    pressure" read -- a bill held in both hands -- plus a few coins at
+    the feet to reinforce "not much money left". No phone/mug/transit
+    card this round: they repeated the same "money" message as the
+    bill without adding a new one, so per the scene-over-decoration
+    rule they're cut rather than piled on.
+    """
+    W, H = 256, 128
+    GROUND_Y = 100
+    s = Scene(W, H, background=P["cream"])
 
-    c.auto_outline(OUTLINE, diagonal=False)
-    return c
+    s.rect(0, GROUND_Y, W - 1, H - 1, P["brown_light"])
+    s.rect(0, GROUND_Y, W - 1, GROUND_Y + 1, P["brown_dark"])  # curb line
+
+    # the apartment building -- background context only: small, distant,
+    # pushed into the corner so it never competes with the character.
+    s.rect(192, 34, 240, GROUND_Y, P["brown_light"])
+    s.rect(190, 30, 242, 34, P["brown_dark"])
+    window_lit = [[True, False], [False, True]]
+    for row in range(2):
+        for col in range(2):
+            x = 198 + col * 24
+            y = 44 + row * 22
+            color = P["gold"] if window_lit[row][col] else P["brown_dark"]
+            s.rect(x, y, x + 10, y + 10, color)
+
+    # the young person themself -- front and center, the clear subject
+    s.paste(CHAR_DIR / "character_student_normal_0.png", 40, GROUND_Y - 64, scale=2)
+
+    # the one core prop: a bill held up in both hands
+    s.rect(94, 76, 112, 96, P["cream_light"])
+    s.rect(97, 80, 109, 82, P["brown"])
+    s.rect(97, 86, 105, 88, P["brown"])
+    s.rect(97, 92, 109, 94, P["coral"])  # amount due, drawing the eye
+
+    # loose change at the feet -- not much left over
+    s.circle(28, 96, 5, P["gold_dark"])
+    s.circle(28, 96, 4, P["gold"])
+    s.circle(50, 93, 4, P["gold_dark"])
+    s.circle(50, 93, 3, P["gold"])
+
+    return s
 
 
 def ending_stable() -> PixelCanvas:
@@ -98,18 +135,43 @@ def ending_stable() -> PixelCanvas:
     return c
 
 
-def ending_scraping() -> PixelCanvas:
-    c = PixelCanvas(128, 128)
-    c.rect(0, 0, 127, 90, P["cream_light"])
-    c.rect(0, 90, 127, 127, P["brown_light"])
-    c.rect(0, 90, 127, 94, P["sage_dark"])
+def ending_scraping() -> Scene:
+    """Scene Brief: "Scraping By" means rent got paid, the lights are
+    still on, but there's nothing left over and no room for error --
+    not thriving (that's Stable: sunshine + a coin pile), not falling
+    apart (that's Debt: rain clouds + bills + a stressed pose). The
+    same house as the other two endings, but a plainer wall color, a
+    smaller/modest tree, a paid-off bill by the door (money went
+    somewhere, not nowhere), exactly one coin left (not a pile, not
+    zero), and the character standing by their own door in a perfectly
+    ordinary "normal" pose -- tired but still here, not dramatized.
 
-    house(c, 36, 100, 56, 40, 16, P["brown_light"], P["brown"], lit=True)
-    tree(c, 18, 112, size=1)
-    coin(c, 92, 114, 5)
+    Composition Plan: same 128x128 canvas and same house(base_y=100,
+    width=56, wall_h=40, roof_h=16) as ending_stable/ending_debt, so the
+    three read as one consistent series. Character pasted at true 1:1
+    native scale (32x32, no upscale) -- not the old 1.25x mismatch.
+    """
+    s = Scene(128, 128, background=P["cream_light"])
+    s.rect(0, 90, 127, 127, P["brown_light"])
+    s.rect(0, 90, 127, 94, P["sage_dark"])
 
-    c.auto_outline(OUTLINE)
-    return c
+    house(s, 36, 100, 56, 40, 16, P["brown"], P["brown_dark"], lit=True)
+    tree(s, 18, 112, size=1)
+
+    # a paid bill by the door -- the money had somewhere to go, it's not
+    # just missing -- and exactly one coin left over, not a pile.
+    s.rect(94, 100, 108, 116, P["cream_light"])
+    s.rect(97, 104, 105, 106, P["brown"])
+    s.rect(97, 109, 105, 111, P["sage_dark"])  # a line struck through: paid
+
+    s.circle(100, 120, 4, P["gold_dark"])
+    s.circle(100, 120, 3, P["gold"])
+
+    # NOTE: the character is NOT baked in here -- GameResultScreen.tsx
+    # overlays the live, mood-swapping CharacterSprite on top of every
+    # ending PNG at a shared position (bottom-[21%] left-[58%], matching
+    # this house's doorway) so there's exactly one character, not two.
+    return s
 
 
 def ending_debt() -> PixelCanvas:

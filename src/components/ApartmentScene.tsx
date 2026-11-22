@@ -7,59 +7,51 @@ interface ApartmentSceneProps {
   stress: number;
 }
 
-const env = (name: string) => `/assets/pixel/environment/${name}.png`;
-const pattern = (name: string) => `/assets/pixel/patterns/${name}.png`;
+// V4: a single pre-made background image (public/assets/pixel/scenes/
+// apartment_room_v4.webp, user-approved, composition locked -- not
+// regenerated or redrawn here). ROOM_WIDTH/HEIGHT are that file's own
+// native pixel dimensions, used only to (a) lock the container's aspect
+// ratio so the image is never stretched/cropped, and (b) convert the
+// character's stand spot -- picked by eye on the rug, see the report --
+// from that same pixel coordinate space into a percentage position.
+const ROOM_WIDTH = 1448;
+const ROOM_HEIGHT = 1086;
+// centerX/footY pin the sprite's horizontal center and ground-contact
+// line -- not its top-left corner -- so a sprite's actual rendered
+// height (which now varies: 32x32 for the three flat-style characters,
+// 32x44 for the Fresh Graduate's new taller art) never changes where
+// its feet land. The image is never forced to a square box (that would
+// stretch a non-square source); width is set and height follows the
+// source's own aspect ratio automatically.
+const CHARACTER_SPOT = { centerX: 725, footY: 780, w: 150 };
 
 export function ApartmentScene({ character, characterState, stress }: ApartmentSceneProps) {
   const moody = stress >= 60;
 
   return (
     <div
-      className="pixel-border relative h-64 w-full overflow-hidden sm:h-72"
+      className="pixel-border relative w-full overflow-hidden"
+      style={{ aspectRatio: `${ROOM_WIDTH} / ${ROOM_HEIGHT}` }}
       role="img"
       aria-label="Pixel art apartment room"
     >
-      {/* wallpaper */}
-      <div
-        className="pixel-img absolute inset-x-0 top-0 h-[70%]"
-        style={{
-          backgroundImage: `url(${pattern("wallpaper_tile.png")})`,
-          backgroundSize: "32px 32px",
-          imageRendering: "pixelated",
-          filter: moody ? "brightness(0.9) saturate(0.85)" : undefined,
-        }}
+      <img
+        src="/assets/pixel/scenes/apartment_room_v4.webp"
+        alt=""
+        className="pixel-img absolute inset-0 h-full w-full"
+        style={{ filter: moody ? "brightness(0.9) saturate(0.85)" : undefined }}
       />
-      {/* floor */}
-      <div
-        className="pixel-img absolute inset-x-0 bottom-0 h-[30%]"
-        style={{
-          backgroundImage: `url(${pattern("floor_tile.png")})`,
-          backgroundSize: "32px 32px",
-          imageRendering: "pixelated",
-        }}
-      />
-      <div className="absolute inset-x-0 top-[68%] h-[4%] bg-sage-dark/70" />
-
-      <img src={env("window")} alt="" className="pixel-img absolute left-[5%] top-[5%] w-[18%]" />
-      <img src={env("calendar")} alt="" className="pixel-img absolute left-[27%] top-[6%] w-[13%]" />
-      <img src={env("wall_art")} alt="" className="pixel-img absolute left-[74%] top-[6%] w-[15%]" />
-
-      <img src={env("rug")} alt="" className="pixel-img absolute bottom-[5%] left-[14%] w-[46%]" />
-      <img src={env("cabinet")} alt="" className="pixel-img absolute bottom-[6%] left-[2%] w-[12%]" />
-      <img src={env("mug")} alt="" className="pixel-img absolute bottom-[34%] left-[3.5%] w-[5%]" />
-      <img src={env("bed")} alt="" className="pixel-img absolute bottom-[4%] right-[2%] w-[34%]" />
-      <img src={env("book_stack")} alt="" className="pixel-img absolute bottom-[5%] right-[1%] w-[9%]" />
-      <img src={env("desk")} alt="" className="pixel-img absolute bottom-[7%] left-[36%] w-[24%]" />
-      <img src={env("laptop")} alt="" className="pixel-img absolute bottom-[22%] left-[41%] w-[10%]" />
-      <img src={env("chair")} alt="" className="pixel-img absolute bottom-[5%] left-[48%] w-[11%]" />
-      <img src={env("lamp")} alt="" className="pixel-img absolute bottom-[30%] left-[38%] w-[8%]" />
-      <img src={env("plant")} alt="" className="pixel-img absolute bottom-[6%] right-[38%] w-[11%]" />
 
       {character && (
         <CharacterSprite
           characterId={character.id}
           mood={characterState}
-          className="absolute bottom-[6%] left-[20%] w-[12%] drop-shadow-sm"
+          className="absolute -translate-x-1/2 drop-shadow-sm"
+          style={{
+            left: `${(CHARACTER_SPOT.centerX / ROOM_WIDTH) * 100}%`,
+            bottom: `${((ROOM_HEIGHT - CHARACTER_SPOT.footY) / ROOM_HEIGHT) * 100}%`,
+            width: `${(CHARACTER_SPOT.w / ROOM_WIDTH) * 100}%`,
+          }}
         />
       )}
     </div>

@@ -22,8 +22,18 @@ const ENDING_MOOD: Record<EndingId, CharacterVisualState> = {
 };
 
 export function GameResultScreen({ onPlayAgain }: GameResultScreenProps) {
-  const { character, balance, stress, energy, decisionHistory, dailyLog, transactions, emergencyFundBuilt, language } =
-    useGameStore();
+  const {
+    character,
+    balance,
+    stress,
+    energy,
+    decisionHistory,
+    dailyLog,
+    transactions,
+    emergencyFundBuilt,
+    language,
+    justUnlockedTrustFund,
+  } = useGameStore();
 
   if (!character) return null;
 
@@ -34,14 +44,26 @@ export function GameResultScreen({ onPlayAgain }: GameResultScreenProps) {
 
   return (
     <div className="mx-auto flex min-h-full max-w-sm flex-col gap-4 px-4 py-8">
+      {justUnlockedTrustFund && (
+        <PixelCard sage className="enter-up text-center text-sm text-sage-dark">
+          {t("unlock.trustFund")}
+        </PixelCard>
+      )}
+
       <PixelCard sage className="enter-up text-center">
         <p className="font-pixel text-[10px] text-sage-dark">{t("result.gameOver")}</p>
         <div className="relative mx-auto mt-2 h-32 w-32">
+          {/* Ending art is drawn at 128x128 native and shown at 128px (1:1), so
+              the character overlay is sized to its own 32px native width at
+              that same 1:1 scale (w-8 = 32px) -- not a guessed size. All
+              three endings share one house() layout (door at x57-71 of the
+              128px canvas), so the character stands just right of the door,
+              on the ground line, at the same spot in every ending. */}
           <img src={`/assets/pixel/scenes/ending_${ending.id}.png`} alt="" className="pixel-img h-32 w-32" />
           <CharacterSprite
             characterId={character.id}
             mood={ENDING_MOOD[ending.id]}
-            className="absolute bottom-3 left-1/2 w-10 -translate-x-1/2"
+            className="absolute bottom-[22%] left-[72%] w-8 -translate-x-1/2"
           />
         </div>
         <h1 className="font-pixel mt-2 text-sm text-brown">{endingText.title}</h1>

@@ -1,4 +1,5 @@
 import { CHARACTERS } from "../data/characters";
+import { isCharacterUnlocked } from "../data/unlocks";
 import type { Character } from "../types/game";
 import { PixelButton } from "../components/PixelButton";
 import { PixelCard } from "../components/PixelCard";
@@ -12,6 +13,7 @@ interface CharacterSetupScreenProps {
 
 export function CharacterSetupScreen({ onSelect }: CharacterSetupScreenProps) {
   const language = useGameStore((s) => s.language);
+  const achievedEndings = useGameStore((s) => s.achievedEndings);
   const t = (key: Parameters<typeof translateUI>[0]) => translateUI(key, language);
 
   return (
@@ -21,13 +23,41 @@ export function CharacterSetupScreen({ onSelect }: CharacterSetupScreenProps) {
       <div className="flex w-full max-w-sm flex-col gap-4">
         {CHARACTERS.map((character) => {
           const shown = localizeCharacter(character, language);
+          const unlocked = isCharacterUnlocked(character.id, achievedEndings);
+
+          if (!unlocked) {
+            return (
+              <PixelCard key={character.id} className="opacity-60">
+                <div className="flex items-center gap-3">
+                  <img
+                    src={`/assets/pixel/characters/character_${character.id}_portrait.png`}
+                    alt={shown.name}
+                    className="pixel-img h-16 w-16 shrink-0 object-contain grayscale"
+                    onError={(e) => {
+                      e.currentTarget.style.visibility = "hidden";
+                    }}
+                  />
+                  <div>
+                    <h2 className="font-pixel text-xs text-brown">
+                      {shown.name} · <span className="text-brown-light">{t("setup.locked.badge")}</span>
+                    </h2>
+                    <p className="mt-1 text-sm text-brown-light">{t("setup.locked.hint")}</p>
+                  </div>
+                </div>
+              </PixelCard>
+            );
+          }
+
           return (
             <PixelCard key={character.id}>
               <div className="flex items-center gap-3">
                 <img
                   src={`/assets/pixel/characters/character_${character.id}_portrait.png`}
                   alt={shown.name}
-                  className="pixel-img h-16 w-16 shrink-0"
+                  className="pixel-img h-16 w-16 shrink-0 object-contain"
+                  onError={(e) => {
+                    e.currentTarget.src = "/assets/pixel/characters/character_graduate_portrait.png";
+                  }}
                 />
                 <div>
                   <h2 className="font-pixel text-xs text-brown">{shown.name}</h2>

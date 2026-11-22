@@ -1,17 +1,18 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type CSSProperties } from "react";
 import type { CharacterVisualState } from "../types/game";
 
 interface CharacterSpriteProps {
   characterId: string;
   mood: CharacterVisualState;
   className?: string;
+  style?: CSSProperties;
 }
 
 const FRAME_MS = 650;
 
 /** A 2-frame idle loop over the mood sprite pair, paused when the
  * viewer asked for reduced motion (frame 0 is always a valid resting pose). */
-export function CharacterSprite({ characterId, mood, className = "" }: CharacterSpriteProps) {
+export function CharacterSprite({ characterId, mood, className = "", style }: CharacterSpriteProps) {
   const [frame, setFrame] = useState(0);
 
   useEffect(() => {
@@ -25,7 +26,15 @@ export function CharacterSprite({ characterId, mood, className = "" }: Character
     <img
       src={`/assets/pixel/characters/character_${characterId}_${mood}_${frame}.png`}
       alt=""
-      className={`pixel-img ${className}`}
+      className={`pixel-img object-contain ${className}`}
+      style={style}
+      // Placeholder for characters without art yet (e.g. a newly-unlocked bonus
+      // character) -- falls back to an existing sprite set rather than a broken image.
+      onError={(e) => {
+        if (characterId !== "graduate") {
+          e.currentTarget.src = `/assets/pixel/characters/character_graduate_${mood}_${frame}.png`;
+        }
+      }}
     />
   );
 }

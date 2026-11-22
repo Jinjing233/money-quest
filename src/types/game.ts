@@ -72,11 +72,13 @@ export interface Character {
   startingStress: number;
   income: RecurringFlow;
   rent: RecurringFlow;
+  /** Minimal passive perk: the first time balance dips below 0 this run, a one-time cushion covers it. */
+  hasFamilySafetyNet?: boolean;
 }
 
 export interface TransactionSource {
-  kind: "income" | "rent" | "event" | "scheduled";
-  /** income/rent: the RecurringFlow id. event/scheduled: the event id or schedule key. */
+  kind: "income" | "rent" | "event" | "scheduled" | "passive";
+  /** income/rent: the RecurringFlow id. event/scheduled: the event id or schedule key. passive: the perk id. */
   id: string;
   choiceId?: string;
 }
@@ -107,6 +109,8 @@ export interface DailyLogEntry {
   energyDelta: number;
   balanceAfter: number;
   decisionLabel?: string;
+  /** Pre-localized one-off note (e.g. a passive perk firing) surfaced on the Daily Summary banner. */
+  note?: string;
 }
 
 export type EndingId = "stable" | "scraping" | "debt";
@@ -130,4 +134,10 @@ export interface GameState {
   scheduledCharges: ScheduledCharge[];
   emergencyFundBuilt: boolean;
   dailyLog: DailyLogEntry[];
+  /** Every ending reached at least once, across all playthroughs in this save — survives resetGame/Play Again. */
+  achievedEndings: EndingId[];
+  /** This run's one-time use of a character's Family Safety Net passive, if it has one. */
+  familySafetyNetUsed: boolean;
+  /** True only on the result screen right after an ending completes an unlock (e.g. Trust Fund Kid). */
+  justUnlockedTrustFund: boolean;
 }

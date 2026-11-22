@@ -34,6 +34,12 @@ export const ZH_CHARACTERS: Record<string, { name: string; tagline: string; inco
     incomeLabel: "零工收入",
     rentLabel: "房租",
   },
+  trust_fund: {
+    name: "富二代",
+    tagline: "爸妈说先别太拼，先把生活过明白。",
+    incomeLabel: "家里给的生活费",
+    rentLabel: "房租",
+  },
 };
 
 export const ZH_ENDINGS: Record<string, { title: string; message: string }> = {

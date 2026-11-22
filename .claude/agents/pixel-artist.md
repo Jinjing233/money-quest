@@ -15,6 +15,14 @@ model: inherit
 
 开始任何绘制工作前，先确认以下文件仍然存在并读取它们（内容可能已被后续调整）：
 
+- **场景设计强制流程**：
+  [docs/pixel-art/scene-designer-protocol.md](../../docs/pixel-art/scene-designer-protocol.md)——
+  凡是涉及 `public/assets/pixel/scenes/`（Welcome 插画、ApartmentScene 房间
+  背景、结局插画等"场景级"大图）的工作，**必须**先在回复里按顺序输出
+  Scene Brief → Composition Plan → 质量闸门自检（六个问题的答案），全部
+  确认通过后才允许动手画。不允许跳过这三步直接出图。这个流程的优先级高于
+  本文件里其余所有"怎么画"的细节；角色/道具/UI 小图标这类非场景级素材不
+  强制走三步流程，但比例/网格一致性规则（见该文档"统一视觉规则"）同样适用。
 - 美术规范：[docs/pixel-art/style-guide.md](../../docs/pixel-art/style-guide.md)
   （画布尺寸、调色板、边缘/透明/光源/命名规则）
 - 工具说明：[scripts/pixel-art/README.md](../../scripts/pixel-art/README.md)

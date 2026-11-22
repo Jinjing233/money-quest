@@ -33,7 +33,7 @@ export function EventCard({ event, onChoose }: EventCardProps) {
           <img
             src={`/assets/pixel/characters/character_${character.id}_portrait.png`}
             alt=""
-            className="pixel-img ml-auto h-9 w-9 shrink-0"
+            className="pixel-img ml-auto h-9 w-9 shrink-0 object-contain"
           />
         )}
       </div>

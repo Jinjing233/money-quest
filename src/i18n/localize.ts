@@ -1,5 +1,6 @@
 import type { Character, EndingId, GameEvent, Language, ScheduledCharge, Transaction } from "../types/game";
 import { ZH_CHARACTERS, ZH_ENDINGS, ZH_EVENTS, ZH_SCHEDULED_LABELS } from "./zhContent";
+import { translateUI } from "./ui";
 
 export function localizeCharacter(character: Character, language: Language): Character {
   if (language === "en") return character;
@@ -45,6 +46,8 @@ export function localizeRecurringLabel(id: string, fallbackLabel: string, langua
     "gig-earnings": ZH_CHARACTERS.gig.incomeLabel,
     rent: ZH_CHARACTERS.graduate.rentLabel,
     "shared-rent": ZH_CHARACTERS.student.rentLabel,
+    "family-allowance": ZH_CHARACTERS.trust_fund.incomeLabel,
+    "trust-fund-rent": ZH_CHARACTERS.trust_fund.rentLabel,
   };
   return byId[id] ?? fallbackLabel;
 }
@@ -57,6 +60,9 @@ export function localizeTransactionLabel(t: Transaction, language: Language): st
   }
   if (t.source.kind === "scheduled") {
     return ZH_SCHEDULED_LABELS[t.source.id] ?? t.label;
+  }
+  if (t.source.kind === "passive") {
+    return translateUI("passive.familySafetyNet.label", language);
   }
   if (t.source.kind === "event") {
     const zhEvent = ZH_EVENTS[t.source.id];

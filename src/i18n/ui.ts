@@ -20,6 +20,19 @@ export const UI_STRINGS = {
   "setup.rent": { en: "Rent", zh: "房租" },
   "setup.choose": { en: "Choose", zh: "选择" },
   "unit.days": { en: "d", zh: "天" },
+  "setup.locked.badge": { en: "Locked", zh: "未解锁" },
+  "setup.locked.hint": {
+    en: "Unlocks after reaching both Scraping By and Fell Into Debt.",
+    zh: "打出『勉强维持』和『陷入负债』两种结局后解锁。",
+  },
+
+  "unlock.trustFund": { en: "New character unlocked: Trust Fund Kid!", zh: "新角色已解锁：富二代！" },
+
+  "passive.familySafetyNet.notice": {
+    en: "Family Safety Net: your parents quietly covered a $300 shortfall.",
+    zh: "家庭兜底：父母悄悄帮你垫上了 $300 的缺口。",
+  },
+  "passive.familySafetyNet.label": { en: "Family Safety Net", zh: "家庭兜底" },
 
   "home.stress": { en: "Stress", zh: "压力" },
   "home.energy": { en: "Energy", zh: "精力" },

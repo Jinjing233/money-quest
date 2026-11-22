@@ -20,7 +20,12 @@ DEFAULT_ROOT = Path(__file__).resolve().parents[2] / "public" / "assets" / "pixe
 
 # Folder name (under public/assets/pixel/) -> allowed pixel sizes.
 EXPECTED_SIZES: dict[str, set[tuple[int, int]]] = {
-    "characters": {(32, 32), (64, 64)},
+    # (32, 44) / (38, 44): new PixelLab-sourced art (Fresh Graduate,
+    # Working Student), each lossless-cropped to its own native non-
+    # square bounding box -- never stretched to fit the old 32x32
+    # square. See integrate_character.py. Expect more odd sizes here as
+    # more characters get real art; that's expected, not a bug.
+    "characters": {(32, 32), (64, 64), (32, 44), (38, 44), (28, 44)},
     "items": {(16, 16), (32, 32)},
     "environment": {(32, 32), (32, 64), (64, 64)},
     "ui": {(16, 16), (24, 24)},

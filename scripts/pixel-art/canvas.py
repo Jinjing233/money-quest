@@ -124,6 +124,65 @@ def make_portrait(
     return out
 
 
+class Scene:
+    """Compose a bigger illustration out of already-drawn, native-resolution
+    assets (furniture PNGs, character sprites) plus flat rect/circle fills,
+    all on ONE shared canvas.
+
+    This exists specifically to stop scenes from mixing inconsistent "pixel
+    sizes": pasting each asset at an integer `scale` (never an arbitrary
+    CSS-style percentage) means a 64px-wide bed and a 32px-wide chair keep
+    their real 2:1 size relationship instead of each being resized to
+    whatever looked okay in isolation.
+    """
+
+    def __init__(self, width: int, height: int, background: RGBA = TRANSPARENT):
+        self.width = width
+        self.height = height
+        self.image = Image.new("RGBA", (width, height), background)
+
+    def rect(self, x0: int, y0: int, x1: int, y1: int, color: RGBA) -> None:
+        x0, x1 = sorted((x0, x1))
+        y0, y1 = sorted((y0, y1))
+        for y in range(y0, y1 + 1):
+            for x in range(x0, x1 + 1):
+                if 0 <= x < self.width and 0 <= y < self.height:
+                    self.image.putpixel((x, y), color)
+
+    def circle(self, cx: float, cy: float, radius: float, color: RGBA) -> None:
+        r2 = radius * radius
+        x0, x1 = int(cx - radius - 1), int(cx + radius + 1)
+        y0, y1 = int(cy - radius - 1), int(cy + radius + 1)
+        for y in range(y0, y1 + 1):
+            for x in range(x0, x1 + 1):
+                dx, dy = x - cx + 0.5, y - cy + 0.5
+                if dx * dx + dy * dy <= r2 and 0 <= x < self.width and 0 <= y < self.height:
+                    self.image.putpixel((x, y), color)
+
+    def paste(self, asset_path: str | Path, x: int, y: int, scale: int = 1) -> tuple[int, int]:
+        """Paste a PNG at its native size x `scale` (nearest-neighbor, so
+        every one of its pixels stays a whole multiple of the scene's own
+        pixel size). (x, y) is the top-left corner. Returns (w, h) pasted."""
+        with Image.open(asset_path) as src:
+            img = src.convert("RGBA")
+            if scale != 1:
+                img = img.resize((img.width * scale, img.height * scale), Image.NEAREST)
+            self.image.paste(img, (x, y), img)
+            return img.size
+
+    def save(self, path: str | Path) -> Path:
+        path = Path(path)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        self.image.save(path, format="PNG")
+        return path
+
+    def save_preview(self, path: str | Path, scale: int = 4) -> Path:
+        path = Path(path)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        self.image.resize((self.width * scale, self.height * scale), Image.NEAREST).save(path, format="PNG")
+        return path
+
+
 def pack_sheet(frames: list[Image.Image | PixelCanvas], columns: int | None = None) -> Image.Image:
     """Pack same-size frames into a grid sprite sheet."""
     images = [f.to_image() if isinstance(f, PixelCanvas) else f for f in frames]
