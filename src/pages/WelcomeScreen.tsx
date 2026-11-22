@@ -34,7 +34,7 @@ export function WelcomeScreen({ hasSave, onStart, onContinue }: WelcomeScreenPro
       </div>
 
       <img
-        src="/assets/pixel/scenes/welcome_bg.png"
+        src="/assets/pixel/scenes/apartment_room_v4.webp"
         alt=""
         className="pixel-img enter-up enter-delay-3 mt-2 w-full max-w-xs pixel-border"
       />

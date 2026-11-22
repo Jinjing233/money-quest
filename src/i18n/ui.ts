@@ -22,8 +22,8 @@ export const UI_STRINGS = {
   "unit.days": { en: "d", zh: "天" },
   "setup.locked.badge": { en: "Locked", zh: "未解锁" },
   "setup.locked.hint": {
-    en: "Unlocks after reaching both Scraping By and Fell Into Debt.",
-    zh: "打出『勉强维持』和『陷入负债』两种结局后解锁。",
+    en: "Unlocks after reaching Scraping By or Fell Into Debt.",
+    zh: "打出『勉强维持』或『陷入负债』任一结局后解锁。",
   },
 
   "unlock.trustFund": { en: "New character unlocked: Trust Fund Kid!", zh: "新角色已解锁：富二代！" },

@@ -1,9 +1,10 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import type { Character, EndingId, GamePhase, GameState } from "../types/game";
+import type { Character, GamePhase, GameState } from "../types/game";
 import { EVENTS } from "../data/events";
 import { computeCharacterState } from "../data/characterState";
 import { resolveEnding } from "../data/ending";
+import { isCharacterUnlocked, TRUST_FUND_CHARACTER_ID } from "../data/unlocks";
 import { translateUI } from "../i18n/ui";
 
 const clamp = (value: number) => Math.min(100, Math.max(0, value));
@@ -20,10 +21,11 @@ const FAMILY_SAFETY_NET_AMOUNT = 300;
 function resolveEndingAndUnlock(state: GameState, balance: number) {
   if (!state.character) return {};
   const ending = resolveEnding(balance, state.stress, state.character);
-  const hadEnding = (id: EndingId) => state.achievedEndings.includes(id);
-  const wasUnlocked = hadEnding("scraping") && hadEnding("debt");
-  const achievedEndings = hadEnding(ending.id) ? state.achievedEndings : [...state.achievedEndings, ending.id];
-  const isUnlockedNow = achievedEndings.includes("scraping") && achievedEndings.includes("debt");
+  const wasUnlocked = isCharacterUnlocked(TRUST_FUND_CHARACTER_ID, state.achievedEndings);
+  const achievedEndings = state.achievedEndings.includes(ending.id)
+    ? state.achievedEndings
+    : [...state.achievedEndings, ending.id];
+  const isUnlockedNow = isCharacterUnlocked(TRUST_FUND_CHARACTER_ID, achievedEndings);
   return { achievedEndings, justUnlockedTrustFund: !wasUnlocked && isUnlockedNow };
 }
 

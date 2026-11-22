@@ -4,7 +4,7 @@ import { analyzeGame } from "../data/analysis";
 import { EVENTS } from "../data/events";
 import { PixelCard } from "../components/PixelCard";
 import { PixelButton } from "../components/PixelButton";
-import { CharacterSprite } from "../components/CharacterSprite";
+import { CharacterTurnaround } from "../components/CharacterTurnaround";
 import type { EndingId, CharacterVisualState } from "../types/game";
 import { translateUI, translateUITemplate } from "../i18n/ui";
 import { localizeEndingText, localizeEvent } from "../i18n/localize";
@@ -58,11 +58,14 @@ export function GameResultScreen({ onPlayAgain }: GameResultScreenProps) {
               that same 1:1 scale (w-8 = 32px) -- not a guessed size. All
               three endings share one house() layout (door at x57-71 of the
               128px canvas), so the character stands just right of the door,
-              on the ground line, at the same spot in every ending. */}
+              on the ground line, at the same spot in every ending. `bottom`
+              (not `top`) positioning means this still holds even though the
+              8-direction turnaround frames are taller than the old square
+              idle art -- the character's feet, not its head, stay pinned. */}
           <img src={`/assets/pixel/scenes/ending_${ending.id}.png`} alt="" className="pixel-img h-32 w-32" />
-          <CharacterSprite
+          <CharacterTurnaround
             characterId={character.id}
-            mood={ENDING_MOOD[ending.id]}
+            fallbackMood={ENDING_MOOD[ending.id]}
             className="absolute bottom-[22%] left-[72%] w-8 -translate-x-1/2"
           />
         </div>

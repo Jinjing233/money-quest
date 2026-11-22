@@ -85,8 +85,8 @@ play, and the stronger one (Fresh Graduate) falling into debt with reckless
 play.
 
 A third, unlockable character (Trust Fund Kid) exists as a reward/relaxed-mode
-option once a player has reached both *Scraping By* and *Fell Into Debt* — see
-`data/unlocks.ts` and `data/characters.ts`. Its numbers are a deliberate
+option once a player has reached either *Scraping By* or *Fell Into Debt* —
+see `data/unlocks.ts` and `data/characters.ts`. Its numbers are a deliberate
 head-start, not part of this cost-of-living model.
 
 ## What this is not
