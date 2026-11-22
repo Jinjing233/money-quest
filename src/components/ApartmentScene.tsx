@@ -1,19 +1,17 @@
-import type { Character } from "../types/game";
+import type { Character, CharacterVisualState } from "../types/game";
 import { CharacterSprite } from "./CharacterSprite";
-import { deriveMood } from "./characterMood";
 
 interface ApartmentSceneProps {
   character: Character | null;
+  characterState: CharacterVisualState;
   stress: number;
-  energy: number;
 }
 
 const env = (name: string) => `/assets/pixel/environment/${name}.png`;
 const pattern = (name: string) => `/assets/pixel/patterns/${name}.png`;
 
-export function ApartmentScene({ character, stress, energy }: ApartmentSceneProps) {
+export function ApartmentScene({ character, characterState, stress }: ApartmentSceneProps) {
   const moody = stress >= 60;
-  const mood = deriveMood(stress, energy);
 
   return (
     <div
@@ -60,7 +58,7 @@ export function ApartmentScene({ character, stress, energy }: ApartmentSceneProp
       {character && (
         <CharacterSprite
           characterId={character.id}
-          mood={mood}
+          mood={characterState}
           className="absolute bottom-[6%] left-[20%] w-[12%] drop-shadow-sm"
         />
       )}

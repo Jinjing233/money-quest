@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
-import type { Mood } from "./characterMood";
+import type { CharacterVisualState } from "../types/game";
 
 interface CharacterSpriteProps {
   characterId: string;
-  mood: Mood;
+  mood: CharacterVisualState;
   className?: string;
 }
 

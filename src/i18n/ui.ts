@@ -2,6 +2,9 @@ import type { Language } from "../types/game";
 
 /** Centralized UI-chrome strings. Nothing game-content-related lives here — see localize.ts for that. */
 export const UI_STRINGS = {
+  "common.day": { en: "Day {day}", zh: "第 {day} 天" },
+  "common.dayOf30": { en: "Day {day} / 30", zh: "第 {day} / 30 天" },
+
   "welcome.title": { en: "Money Quest", zh: "金钱大冒险" },
   "welcome.subtitle": { en: "Can you survive 30 days?", zh: "你能撑过 30 天吗？" },
   "welcome.body": {
@@ -16,8 +19,7 @@ export const UI_STRINGS = {
   "setup.income": { en: "Income", zh: "收入" },
   "setup.rent": { en: "Rent", zh: "房租" },
   "setup.choose": { en: "Choose", zh: "选择" },
-  "setup.perWeek": { en: "/wk", zh: "/周" },
-  "setup.perMonth": { en: "/mo", zh: "/月" },
+  "unit.days": { en: "d", zh: "天" },
 
   "home.stress": { en: "Stress", zh: "压力" },
   "home.energy": { en: "Energy", zh: "精力" },
@@ -57,4 +59,21 @@ export type UIStringKey = keyof typeof UI_STRINGS;
 
 export function translateUI(key: UIStringKey, language: Language): string {
   return UI_STRINGS[key][language];
+}
+
+/** Same lookup, with simple {name} placeholders swapped in (e.g. "common.day" -> "Day {day}"). */
+export function translateUITemplate(
+  key: UIStringKey,
+  language: Language,
+  vars: Record<string, string | number>,
+): string {
+  let text: string = UI_STRINGS[key][language];
+  for (const [name, value] of Object.entries(vars)) {
+    text = text.split(`{${name}}`).join(String(value));
+  }
+  return text;
+}
+
+export function formatRecurringAmount(amount: number, everyDays: number, language: Language): string {
+  return language === "zh" ? `每${everyDays}天 $${amount}` : `$${amount} every ${everyDays} days`;
 }

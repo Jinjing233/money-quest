@@ -4,6 +4,7 @@ import { useGameStore } from "../store/gameStore";
 import { PixelCard } from "./PixelCard";
 import { PixelButton } from "./PixelButton";
 import { eventCategoryIconPath } from "./eventCategoryIcons";
+import { translateUITemplate } from "../i18n/ui";
 
 interface EventCardProps {
   event: GameEvent;
@@ -15,6 +16,7 @@ const SELECT_FEEDBACK_MS = 160;
 export function EventCard({ event, onChoose }: EventCardProps) {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const character = useGameStore((state) => state.character);
+  const language = useGameStore((state) => state.language);
 
   const handleChoose = (choiceId: string) => {
     if (selectedId) return;
@@ -26,7 +28,7 @@ export function EventCard({ event, onChoose }: EventCardProps) {
     <PixelCard sage className="mx-auto w-full max-w-sm break-words">
       <div className="flex items-center gap-2">
         <img src={eventCategoryIconPath(event.id)} alt="" className="pixel-img h-6 w-6 shrink-0" />
-        <p className="font-pixel text-[10px] text-sage-dark">Day {event.day}</p>
+        <p className="font-pixel text-[10px] text-sage-dark">{translateUITemplate("common.day", language, { day: event.day })}</p>
         {character && (
           <img
             src={`/assets/pixel/characters/character_${character.id}_portrait.png`}

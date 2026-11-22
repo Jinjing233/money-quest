@@ -1,16 +1,9 @@
-import { useState } from "react";
+import { useGameStore } from "../store/gameStore";
 
-/**
- * Visual-only pixel segmented control for EN / 中. There is no i18n
- * wiring yet on the Developer Agent's side (no translation strings,
- * no store action to change `language`), so this intentionally keeps
- * its own local display state instead of inventing a second language
- * system -- it demonstrates the control style now, ready to be swapped
- * for a real `value`/`onChange` pair (store's `language` field) once
- * that lands, without any visual change needed.
- */
+/** Pixel segmented control for EN / 中, backed by the real `language` store field. */
 export function LanguageToggle() {
-  const [lang, setLang] = useState<"en" | "zh">("en");
+  const lang = useGameStore((s) => s.language);
+  const setLang = useGameStore((s) => s.setLanguage);
 
   return (
     <div className="pixel-border inline-flex bg-cream-light text-[10px]">
